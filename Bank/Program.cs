@@ -1,64 +1,60 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 
 namespace Bank
 {
     class Program
     {
-        static string InsertCard()
+        static void Main(string[] args)
+        {
+            string cardNumber = ReadCardNumber();
+            double sold = AuthenticateAndReturnSold(cardNumber);
+            if (sold == double.MinValue)
+            {
+
+            }
+            else
+            {
+                Play(sold);
+            }
+        }
+
+        static string ReadCardNumber()
         {
             Console.WriteLine("Insert card(number):");
-            string cardNumber = Console.ReadLine();
-
-            return cardNumber;
+            return Console.ReadLine();
         }
-         static double CardValidation(string receivedCardNumber)
+
+        static string ReadPin()
         {
-            bool checkCard = false;
-            bool checkPIN = false;
-            double currentSold = double.MinValue;
+            Console.WriteLine("Insert pin:");
+            return Console.ReadLine();
+        }
 
-            foreach (string line in System.IO.File.ReadLines(@"G:\work\Target Practice\Bank\Bank\Carduri.txt"))
+        static double AuthenticateAndReturnSold(string cardNumber)
+        {
+            var lines = File.ReadLines(@"G:\work\Target Practice\Bank\Bank\Carduri.txt").ToList();
+            for (int idx = 0; idx < lines.Count / 3; idx++)
             {
-                if (checkPIN)
+                if (lines[idx] == cardNumber)
                 {
-                    Console.Clear();
-
-                    currentSold = double.Parse(line);
-
-                    Console.WriteLine($"Your account sold is:{currentSold}$");
-
-                    break;
-                }
-                else if(checkCard)
-                {
-                    Console.Clear();
-
-                    Console.WriteLine("Insert PIN:");
-                    int PIN = int.Parse(Console.ReadLine());
-
-                    if (line == PIN.ToString())
+                    var pin = ReadPin();
+                    if (lines[idx + 1] == pin)
                     {
-                        checkPIN = true;
+                        return double.Parse(lines[idx + 2]);
                     }
                     else
                     {
                         Console.WriteLine("Incorect password");
                     }
                 }
-                else if( line ==  receivedCardNumber)
+                else
                 {
-                    checkCard = true;
+                    Console.WriteLine("Unknown card");
                 }
-                
             }
-
-            if(currentSold == double.MinValue)
-            {
-                Console.WriteLine("Unknown card");
-            }
-
-            return currentSold;
-
+            return double.MinValue;
         }
 
         static double Deposit(double currentSold)
@@ -68,7 +64,7 @@ namespace Bank
 
             double deposit = double.Parse(Console.ReadLine());
 
-            if(deposit <= 500)
+            if (deposit <= 500)
             {
                 currentSold += deposit;
 
@@ -78,8 +74,6 @@ namespace Bank
             {
                 Console.WriteLine("Too much boss");
             }
-            
-
             return currentSold;
         }
 
@@ -89,8 +83,8 @@ namespace Bank
             Console.WriteLine("How much boss?");
 
             double withdraw = double.Parse(Console.ReadLine());
-            
-            if(withdraw >300)
+
+            if (withdraw > 300)
             {
                 Console.WriteLine("Too much boss");
             }
@@ -104,7 +98,7 @@ namespace Bank
             return currentsold;
         }
 
-        static void Menu()
+        static void PrintMenu()
         {
             Console.WriteLine("1) Check Sold");
             Console.WriteLine("2) Deposit");
@@ -114,48 +108,31 @@ namespace Bank
 
         static void Play(double localSold)
         {
-            bool temp = true;
-
-            while(temp)
+            while (true)
             {
-                Menu();
+                PrintMenu();
 
                 int choice = int.Parse(Console.ReadLine());
 
-                switch(choice)
+                switch (choice)
                 {
                     case 1:
                         Console.WriteLine(localSold);
                         break;
 
                     case 2:
-                        Deposit(localSold);
+                        localSold = Deposit(localSold);
                         break;
 
                     case 3:
-                        Withdraw(localSold);
+                        localSold = Withdraw(localSold);
                         break;
 
                     case 4:
-                        InsertCard();
+                        Environment.Exit(0);
                         break;
-
                 }
-
-                
             }
-        }
-        
-        static void Main(string[] args)
-        {
-            string cardNumber = InsertCard();
-            double sold;
-
-            sold = CardValidation(cardNumber);
-
-            Play(sold);
-
-
         }
     }
 }
